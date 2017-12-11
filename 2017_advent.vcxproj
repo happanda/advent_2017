@@ -119,6 +119,7 @@
   <ItemGroup>
     <ClCompile Include="src\bug_01.cpp" />
     <ClCompile Include="src\bug_02.cpp" />
+    <ClCompile Include="src\bug_03.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>

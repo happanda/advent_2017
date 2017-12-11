@@ -6,7 +6,7 @@
 #include "advent.h"
 
 
-const char* input_01 = R"(626	2424	2593	139	2136	163	1689	367	2235	125	2365	924	135	2583	1425	2502
+const char* input_02 = R"(626	2424	2593	139	2136	163	1689	367	2235	125	2365	924	135	2583	1425	2502
 183	149	3794	5221	5520	162	5430	4395	2466	1888	3999	3595	195	181	6188	4863
 163	195	512	309	102	175	343	134	401	372	368	321	350	354	183	490
 2441	228	250	2710	200	1166	231	2772	1473	2898	2528	2719	1736	249	1796	903
@@ -28,7 +28,7 @@ void runFix<1, 0>(int argc, char* argv[])
 {
 	int totalSum = 0;
 
-	std::istringstream iss(input_01);
+	std::istringstream iss(input_02);
 	std::string line;
 	while (std::getline(iss, line, '\n'))
 	{
@@ -52,7 +52,7 @@ void runFix<1, 1>(int argc, char* argv[])
 {
 	int totalSum = 0;
 
-	std::istringstream iss(input_01);
+	std::istringstream iss(input_02);
 	std::string line;
 
 	while (std::getline(iss, line, '\n'))
