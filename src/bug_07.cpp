@@ -1,6 +1,7 @@
 #include <iostream>
 #include <regex>
 #include <sstream>
+#include <stack>
 #include <vector>
 #include <unordered_map>
 #include "advent.h"
@@ -775,6 +776,8 @@ sctwwty (69)
 gdndx (193)
 lgqhttl (323) -> hzmiprs, yqgwle)")
 +
+"\n"
++
 R"(yktkkr (98)
 zzjap (88) -> mpgup, zeohg
 uylmxqo (38) -> pjcluy, bqpjwai
@@ -1336,4 +1339,145 @@ void runFix<7, 0>(int argc, char* argv[])
 	}
 
 	std::cout << prog << std::endl;
+}
+
+struct ProgramWeight
+{
+	size_t ownWeight{ 0 };
+	size_t totalWeight{ 0 };
+};
+
+typedef std::unordered_multimap<std::string, std::string> MapType;
+typedef std::unordered_map<std::string, ProgramWeight> WeightType;
+
+void fillWeights(std::string const& progName, MapType const& tree, WeightType& weights, std::string& faultyProgBase)
+{
+	size_t weight = weights.at(progName).ownWeight;
+	auto const& range = tree.equal_range(progName);
+	size_t weightAbove = 0;
+
+	for (auto it = range.first; it != range.second; ++it)
+	{
+		auto const& progAbove = it->second;
+		fillWeights(progAbove, tree, weights, faultyProgBase);
+		if (weightAbove > 0 && weightAbove != weights[progAbove].totalWeight)
+		{
+			if (faultyProgBase.empty())
+				faultyProgBase = progName;
+		}
+		else
+			weightAbove = weights[progAbove].totalWeight;
+		weight += weights[progAbove].totalWeight;
+	}
+	weights.at(progName).totalWeight = weight;
+}
+
+template <>
+void runFix<7, 1>(int argc, char* argv[])
+{
+	MapType programTree;
+	WeightType programWeights;
+
+	std::istringstream iss(input_07);
+	std::string line;
+	while (std::getline(iss, line))
+	{
+		std::regex weightRegex("\\d+");
+		std::smatch weightMatch;
+		std::regex_search(line, weightMatch, weightRegex);
+		size_t const weight = std::stoul(weightMatch.str());
+
+		std::regex wordsRegex("[a-z]+");
+		auto words_begin = std::sregex_iterator(line.begin(), line.end(), wordsRegex);
+		auto words_end = std::sregex_iterator();
+
+		int i = 0;
+		std::string base;
+		for (auto w = words_begin; w != words_end; ++w)
+		{
+			std::smatch match = *w;
+
+			if (i == 0)
+			{
+				base = match.str();
+				programWeights[base].ownWeight = weight;
+				programWeights[base].totalWeight = 0;
+			}
+			else
+			{
+				programTree.insert(MapType::value_type(base, match.str()));
+			}
+			++i;
+		}
+	}
+
+	// find root
+	std::string root;
+	for (auto const& prog : programWeights)
+	{
+		bool found = false;
+		for (auto const& pp : programTree)
+		{
+			if (pp.second == prog.first)
+			{
+				found = true;
+				break;
+			}
+		}
+		if (found == false)
+		{
+			root = prog.first;
+			break;
+		}
+	}
+
+	std::string faultyProgBase;
+	fillWeights(root, programTree, programWeights, faultyProgBase);
+
+	//print out all from root
+	/*for (auto const& prog : programWeights)
+	{
+		std::string const& progName = prog.first;
+		std::cout << progName << " (" << prog.second.totalWeight << ") -> ";
+
+		size_t curWeight = 0;
+		auto const& range = programTree.equal_range(progName);
+		for (auto it = range.first; it != range.second; ++it)
+		{
+			std::string const& progAbove = it->second;
+			if (curWeight > 0 && curWeight != programWeights[progAbove].totalWeight)
+				std::cout << "### ";
+			curWeight = programWeights[progAbove].totalWeight;
+			std::cout << progAbove << " (" << curWeight << "), ";
+		}
+		std::cout << std::endl;
+	}*/
+	
+	int weightDiff = 0;
+	auto const& range = programTree.equal_range(faultyProgBase);
+	for (auto it = range.first; it != range.second; ++it)
+	{
+		auto const& progOne = it->second;
+		bool okay = false;
+
+		for (auto jt = range.first; !okay && jt != range.second; ++jt)
+		{
+			if (jt == it)
+				continue;
+
+			auto const& progTwo = jt->second;
+			if (programWeights[progOne].totalWeight == programWeights[progTwo].totalWeight)
+			{
+				okay = true;
+			}
+			else
+				weightDiff = (int)programWeights[progTwo].totalWeight - programWeights[progOne].totalWeight;
+		}
+
+		if (!okay)
+		{
+			std::cout << programWeights[progOne].ownWeight + weightDiff << std::endl;
+			break;
+		}
+	}
 }
