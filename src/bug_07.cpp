@@ -1,7 +1,6 @@
 #include <iostream>
 #include <regex>
 #include <sstream>
-#include <stack>
 #include <vector>
 #include <unordered_map>
 #include "advent.h"
