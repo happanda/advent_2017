@@ -40,6 +40,18 @@ size_t findMax(std::vector<size_t> const& blocks)
 	return maxInd;
 }
 
+bool equals(std::vector<size_t> const& lhs_blocks, std::vector<size_t> const& rhs_blocks)
+{
+	if (lhs_blocks.size() != rhs_blocks.size())
+		return false;
+	for (size_t i = 0; i < lhs_blocks.size(); ++i)
+	{
+		if (lhs_blocks[i] != rhs_blocks[i])
+			return false;
+	}
+	return true;
+}
+
 std::string toString(std::vector<size_t> const& blocks)
 {
 	std::ostringstream oss;
@@ -93,4 +105,39 @@ void runFix<6, 0>(int argc, char* argv[])
 	}
 	
 	std::cout << period << " " << history.size() - repeatInd << std::endl;
+}
+
+template <>
+void runFix<6, 1>(int argc, char* argv[])
+{
+	std::vector<size_t> blocks, blocks_copy;
+
+	std::istringstream iss(input_06);
+	int number = 0;
+	while (iss >> number)
+	{
+		blocks.push_back(number);
+	}
+	blocks_copy = blocks;
+	distribute(blocks_copy, findMax(blocks_copy));
+
+	bool stop = false;
+
+	while (!equals(blocks, blocks_copy))
+	{
+		distribute(blocks, findMax(blocks));
+		distribute(blocks_copy, findMax(blocks_copy));
+		distribute(blocks_copy, findMax(blocks_copy));
+	}
+
+	size_t period = 1;
+	distribute(blocks_copy, findMax(blocks_copy));
+
+	while (!equals(blocks, blocks_copy))
+	{
+		distribute(blocks_copy, findMax(blocks_copy));
+		++period;
+	}
+
+	std::cout << period << std::endl;
 }
