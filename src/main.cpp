@@ -4,8 +4,6 @@
 
 int main(int argc, char* argv[])
 {
-	runFix<8, 1>(argc, argv);
-	//int pauseVar = 0;
-	//std::cin >> pauseVar;
-	return 1;
+	runFix<9, 1>(argc, argv);
+	return 0;
 }
