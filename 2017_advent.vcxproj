@@ -126,6 +126,7 @@
     <ClCompile Include="src\bug_07.cpp" />
     <ClCompile Include="src\bug_08.cpp" />
     <ClCompile Include="src\bug_09.cpp" />
+    <ClCompile Include="src\bug_10.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
