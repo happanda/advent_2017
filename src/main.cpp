@@ -4,6 +4,6 @@
 
 int main(int argc, char* argv[])
 {
-	runFix<10, 1>(argc, argv);
+	runFix<11, 0>(argc, argv);
 	return 0;
 }

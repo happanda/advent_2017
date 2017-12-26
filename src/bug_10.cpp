@@ -6,7 +6,7 @@
 #include "advent.h"
 
 
-std::string const input_08 = std::string(R"(206,63,255,131,65,80,238,157,254,24,133,2,16,0,1,3)");
+std::string const input_10 = std::string(R"(206,63,255,131,65,80,238,157,254,24,133,2,16,0,1,3)");
 
 void reverse(std::vector<int>& vect, int from, int length)
 {
@@ -24,7 +24,7 @@ void runFix<10, 0>(int argc, char* argv[])
 	std::vector<int> sequence;
 	std::generate_n(std::back_inserter(sequence), seqLength, [&sequence]() {return sequence.size(); });
 
-	std::istringstream iss(input_08);
+	std::istringstream iss(input_10);
 	std::string word;
 	int curInd = 0;
 	int skipSize = 0;
@@ -53,7 +53,7 @@ void runFix<10, 1>(int argc, char* argv[])
 	std::vector<int> sequence;
 	std::generate_n(std::back_inserter(sequence), seqLength, [&sequence]() {return sequence.size(); });
 
-	std::string input(input_08);
+	std::string input(input_10);
 	std::vector<int> lengths;
 	std::transform(input.begin(), input.end(), std::back_inserter(lengths), [](char symbol) { return static_cast<int>(symbol); });
 	for (int n : { 17, 31, 73, 47, 23 })
