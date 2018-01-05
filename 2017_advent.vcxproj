@@ -81,6 +81,9 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeaderFile>$(SolutionDir)src\stdafx.h</PrecompiledHeaderFile>
+      <ForcedIncludeFiles>$(SolutionDir)src\stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -97,6 +100,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeaderFile>$(SolutionDir)src\stdafx.h</PrecompiledHeaderFile>
+      <ForcedIncludeFiles>$(SolutionDir)src\stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -128,10 +134,15 @@
     <ClCompile Include="src\bug_09.cpp" />
     <ClCompile Include="src\bug_10.cpp" />
     <ClCompile Include="src\bug_11.cpp" />
+    <ClCompile Include="src\bug_12.cpp" />
+    <ClCompile Include="src\io.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\advent.h" />
+    <ClInclude Include="src\io.h" />
+    <ClInclude Include="src\stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

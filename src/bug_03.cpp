@@ -1,11 +1,5 @@
-#include <algorithm>
-#include <iostream>
-#include <vector>
-#include <utility>
 #include "advent.h"
 
-
-int input_03 = 368078;
 
 std::pair<int, int> runFix2_toCoordinates(int N)
 {
@@ -35,22 +29,24 @@ std::pair<int, int> runFix2_toCoordinates(int N)
 	return coords;
 }
 
-template <>
-void runFix<2, 0>(int argc, char* argv[])
+void BugFix<3>::solve1st()
 {
+	int number;
+	*mIn >> number;
+
 	//for (input_03 = 2; input_03 <= 25; ++input_03)
 	{
 		int manhattanDist = 0;
-		if (input_03 == 1)
+		if (number == 1)
 		{
-			std::cout << "0" << std::endl;
+			*mOut << "0" << std::endl;
 			return;
 		}
 
-		std::pair<int, int> coords = runFix2_toCoordinates(input_03);
+		std::pair<int, int> coords = runFix2_toCoordinates(number);
 
-		//std::cout << input_03 << " : " << coords.first << ", " << coords.second << std::endl;
-		std::cout << input_03 << " : " << std::abs(coords.first) + std::abs(coords.second) << std::endl;
+		//*mOut << input_03 << " : " << coords.first << ", " << coords.second << std::endl;
+		*mOut << std::abs(coords.first) + std::abs(coords.second) << std::endl;
 	}
 }
 
@@ -70,14 +66,16 @@ int runFix2_toSpiralNumber(const std::pair<int, int>& coords)
 	return N + 1;
 }
 
-template <>
-void runFix<2, 1>(int argc, char* argv[])
+void BugFix<3>::solve2nd()
 {
+	int number;
+	*mIn >> number;
+
 	const std::pair<int, int> shifts[] = { { 1, 0 },{ 1, 1 },{ 0, 1 },{ -1, 1 },{ -1, 0 },{ -1, -1 },{ 0, -1 },{ 1, -1 } };
 
 	std::vector<int> spiral{ 1, 1 };
 
-	while (*spiral.rbegin() < input_03)
+	while (*spiral.rbegin() < number)
 	{
 		int number = spiral.size() + 1;
 		const std::pair<int, int> coords = runFix2_toCoordinates(number);
@@ -95,12 +93,12 @@ void runFix<2, 1>(int argc, char* argv[])
 		spiral.push_back(sum);
 	}
 
-	std::cout << *spiral.rbegin() << std::endl;
+	*mOut << *spiral.rbegin() << std::endl;
 	/*for (int x = -2; x <= 2; ++x)
 	{
 		for (int y = -2; y <= 2; ++y)
 		{
-			std::cout << x << ", " << y << " : " << runFix2_toSpiralNumber(std::make_pair(x, y)) << std::endl;
+			*mOut << x << ", " << y << " : " << runFix2_toSpiralNumber(std::make_pair(x, y)) << std::endl;
 		}
 	}*/
 }

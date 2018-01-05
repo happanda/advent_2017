@@ -4,6 +4,11 @@
 
 int main(int argc, char* argv[])
 {
-	runFix<11, 0>(argc, argv);
+	{
+		BugFix<12> bugfix;
+		bugfix.solve1();
+		bugfix.solve2();
+	}
+
 	return 0;
 }

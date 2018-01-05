@@ -2,3 +2,5 @@
 *.VC.*  
 build  
 *.user
+io/*.out
+ipch

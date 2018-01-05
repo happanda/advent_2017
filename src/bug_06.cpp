@@ -1,10 +1,5 @@
-#include <iostream>
-#include <sstream>
-#include <vector>
 #include "advent.h"
 
-
-const char* input_06 = "14	0	15	12	11	11	3	5	1	6	8	4	9	1	8	4";
 
 void distribute(std::vector<size_t>& blocks, int ind)
 {
@@ -67,14 +62,12 @@ std::string toString(std::vector<size_t> const& blocks)
 // I know how to detect a loop without big history arrays,
 // but couldn't come up with how to count loop size and entering step number.
 // At least not during 30 minutes I gave this problem.
-template <>
-void runFix<6, 0>(int argc, char* argv[])
+void BugFix<6>::solve1st()
 {
 	std::vector<size_t> blocks, blocks_copy;
 
-	std::istringstream iss(input_06);
 	int number = 0;
-	while (iss >> number)
+	while (*mIn >> number)
 	{
 		blocks.push_back(number);
 	}
@@ -104,17 +97,15 @@ void runFix<6, 0>(int argc, char* argv[])
 			history.push_back(toStr);
 	}
 	
-	std::cout << period << " " << history.size() - repeatInd << std::endl;
+	*mOut << period << " " << history.size() - repeatInd << std::endl;
 }
 
-template <>
-void runFix<6, 1>(int argc, char* argv[])
+void BugFix<6>::solve2nd()
 {
 	std::vector<size_t> blocks, blocks_copy;
 
-	std::istringstream iss(input_06);
 	int number = 0;
-	while (iss >> number)
+	while (*mIn >> number)
 	{
 		blocks.push_back(number);
 	}
@@ -139,5 +130,5 @@ void runFix<6, 1>(int argc, char* argv[])
 		++period;
 	}
 
-	std::cout << period << std::endl;
+	*mOut << period << std::endl;
 }

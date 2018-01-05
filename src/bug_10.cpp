@@ -1,12 +1,5 @@
-#include <algorithm>
-#include <iostream>
-#include <iterator>
-#include <sstream>
-#include <vector>
 #include "advent.h"
 
-
-std::string const input_10 = std::string(R"(206,63,255,131,65,80,238,157,254,24,133,2,16,0,1,3)");
 
 void reverse(std::vector<int>& vect, int from, int length)
 {
@@ -17,19 +10,17 @@ void reverse(std::vector<int>& vect, int from, int length)
 		std::swap(vect[(from + i) % vsize], vect[(from + length - i - 1) % vsize]);
 }
 
-template <>
-void runFix<10, 0>(int argc, char* argv[])
+void BugFix<10>::solve1st()
 {
 	int const seqLength = 256;
 	std::vector<int> sequence;
 	std::generate_n(std::back_inserter(sequence), seqLength, [&sequence]() {return sequence.size(); });
 
-	std::istringstream iss(input_10);
 	std::string word;
 	int curInd = 0;
 	int skipSize = 0;
 
-	while (std::getline(iss, word, ','))
+	while (std::getline(*mIn, word, ','))
 	{
 		int const length = std::stoi(word);
 		if (length > static_cast<int>(sequence.size()))
@@ -40,11 +31,10 @@ void runFix<10, 0>(int argc, char* argv[])
 		++skipSize;
 	}
 
-	std::cout << sequence[0] * sequence[1] << std::endl;
+	*mOut << sequence[0] * sequence[1] << std::endl;
 }
 
-template <>
-void runFix<10, 1>(int argc, char* argv[])
+void BugFix<10>::solve2nd()
 {
 	int const numRounds = 64;
 	int const seqLength = 256;
@@ -53,7 +43,9 @@ void runFix<10, 1>(int argc, char* argv[])
 	std::vector<int> sequence;
 	std::generate_n(std::back_inserter(sequence), seqLength, [&sequence]() {return sequence.size(); });
 
-	std::string input(input_10);
+	std::string input;
+	*mIn >> input;
+
 	std::vector<int> lengths;
 	std::transform(input.begin(), input.end(), std::back_inserter(lengths), [](char symbol) { return static_cast<int>(symbol); });
 	for (int n : { 17, 31, 73, 47, 23 })
@@ -75,7 +67,7 @@ void runFix<10, 1>(int argc, char* argv[])
 		}
 	}
 
-	std::string xored(2 * seqLength / xorLength + 1, '\0');
+	std::string xored(2 * seqLength / xorLength, 0);
 	for (int i = 0; i < seqLength / xorLength; ++i)
 	{
 		int xorResult = 0;
@@ -96,5 +88,5 @@ void runFix<10, 1>(int argc, char* argv[])
 			xored[i * 2 + 1] = hex0 - 10 + 'a';
 	}
 
-	std::cout << xored << std::endl;
+	*mOut << xored << std::endl;
 }
