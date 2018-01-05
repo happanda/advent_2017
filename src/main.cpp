@@ -5,7 +5,7 @@
 int main(int argc, char* argv[])
 {
 	{
-		BugFix<12> bugfix;
+		BugFix<13> bugfix;
 		bugfix.solve1();
 		bugfix.solve2();
 	}

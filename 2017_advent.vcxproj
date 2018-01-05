@@ -135,6 +135,7 @@
     <ClCompile Include="src\bug_10.cpp" />
     <ClCompile Include="src\bug_11.cpp" />
     <ClCompile Include="src\bug_12.cpp" />
+    <ClCompile Include="src\bug_13.cpp" />
     <ClCompile Include="src\io.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\stdafx.cpp" />
