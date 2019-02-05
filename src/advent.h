@@ -2,6 +2,8 @@
 #include "io.h"
 
 
+using std::uint32_t;
+
 template <int bugNum>
 struct BugFix
 {
@@ -31,3 +33,15 @@ private:
 	std::unique_ptr<std::ifstream> mIn;
 	std::unique_ptr<std::ofstream> mOut;
 };
+
+template <class Enum>
+constexpr int toInt(Enum value)
+{
+	return static_cast<int>(value);
+}
+
+template <class Enum>
+constexpr Enum toEnum(int value)
+{
+	return static_cast<Enum>(value);
+}

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
+#include <assert.h>
 #include <iostream>
 #include <iterator>
 #include <map>

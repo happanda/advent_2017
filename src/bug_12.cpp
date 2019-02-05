@@ -1,14 +1,3 @@
-#include <algorithm>
-#include <iostream>
-#include <iterator>
-#include <map>
-#include <regex>
-#include <memory>
-#include <queue>
-#include <set>
-#include <sstream>
-#include <unordered_map>
-#include <vector>
 #include "advent.h"
 
 
