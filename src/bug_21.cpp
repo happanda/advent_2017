@@ -13,7 +13,7 @@ struct BinarySquareArray
 	}
 
 	BinarySquareArray& operator=(BinarySquareArray const& rhs) = default;
-	
+
 	char& at(Index x, Index y)
 	{
 		return mArray.at(y * mSize + x);
@@ -69,24 +69,101 @@ struct BinarySquareArray
 		return oss.str();
 	}
 
+	struct BinarySquareArrayView
+	{
+		BinarySquareArrayView(BinarySquareArray* bsa, Index x, Index y, Index size)
+			: mArray(bsa), mX(x), mY(y), mSize(size)
+		{
+		}
+
+		BinarySquareArrayView const& operator=(BinarySquareArray const& rhs)
+		{
+			assert(mSize == rhs.size());
+			for (Index j = 0; j < mSize; ++j)
+			{
+				for (Index i = 0; i < mSize; ++i)
+				{
+					at(i, j) = rhs.at(i, j);
+				}
+			}
+			return *this;
+		}
+
+		char& at(Index x, Index y)
+		{
+			return mArray->at(x + mX, y + mY);
+		}
+
+		char const& at(Index x, Index y) const
+		{
+			return mArray->at(x + mX, y + mY);
+		}
+
+		Index size() const
+		{
+			return mSize;
+		}
+
+		uint32_t hash() const
+		{
+			uint32_t hash{ 0 };
+			uint32_t two{ 1 };
+			for (Index y = 0; y < mY; ++y)
+				for (Index x = 0; x < mX; ++x)
+				{
+					if (at(x, y))
+					{
+						hash += two;
+					}
+					two *= 2;
+				}
+			return hash;
+		}
+
+		std::string toString() const
+		{
+			std::ostringstream oss;
+			for (Index j = 0; j < mSize; ++j)
+			{
+				for (Index i = 0; i < mSize; ++i)
+				{
+					oss << (at(i, j) ? 'o' : '.');
+				}
+				if (j < mSize)
+					oss << std::endl;
+			}
+			return oss.str();
+		}
+
+	private:
+		BinarySquareArray* mArray;
+		Index mX{ 0 };
+		Index mY{ 0 };
+		Index mSize{ 0 };
+	};
+
+	BinarySquareArray(BinarySquareArrayView const& rhs)
+	{
+		mSize = rhs.size();
+		mArray.resize(mSize * mSize);
+		for (Index j = 0; j < mSize; ++j)
+		{
+			for (Index i = 0; i < mSize; ++i)
+			{
+				at(i, j) = rhs.at(i, j);
+			}
+		}
+	}
+
 private:
 	Index mSize{ 0 };
 	std::vector<char> mArray;
 };
 
-std::list<BinarySquareArray*> newListFromString(std::string const& str)
+BinarySquareArray* newFromString(std::string const& str)
 {
 	auto const size = str.find('/');
-	std::list<BinarySquareArray*> sql;
-	if (size == 2)
-		sql.push_back(new BinarySquareArray(2));
-	else if (size == 3)
-		sql.push_back(new BinarySquareArray(3));
-	else
-	{
-		sql.push_front(new BinarySquareArray(2));
-		sql.push_back(new BinarySquareArray(2));
-	}
+	BinarySquareArray* sql = new BinarySquareArray(size);
 
 	int x = 0, y = 0;
 	for (uint32_t j = 0; j < str.size(); ++j)
@@ -94,27 +171,12 @@ std::list<BinarySquareArray*> newListFromString(std::string const& str)
 		if (str[j] == '/')
 		{
 			++y;
-			if (size == 4 && y == 2)
-			{
-				sql.push_front(new BinarySquareArray(2));
-				sql.push_back(new BinarySquareArray(2));
-			}
 		}
 		else
 		{
 			if (str[j] == '#')
 			{
-				if (size < 4)
-				{
-					sql.back()->at(x, y) = true;
-				}
-				else
-				{
-					if (x < 2)
-						sql.front()->at(x, y % 2) = true;
-					else
-						sql.back()->at(x % 2, y % 2) = true;
-				}
+				sql->at(x, y) = true;
 			}
 			x = (x + 1) % size;
 		}
@@ -207,20 +269,33 @@ void lexLowest(BinarySquareArray& bs)
 	bs = bsCopy;
 }
 
+void lexLowest(BinarySquareArray::BinarySquareArrayView& bsv)
+{
+	BinarySquareArray bsCopy = bsv;
+	lexLowest(bsCopy);
+	bsv = bsCopy;
+}
+
+typedef BinarySquareArray::BinarySquareArrayView BSAView;
 
 void BugFix<21>::solve1st()
 {
 	std::list<BinarySquareArray*> allSquares;
-	std::unordered_map<BinarySquareArray, std::list<BinarySquareArray*>> rules;
+	std::unordered_map<BinarySquareArray, BinarySquareArray*> rules;
 
-	BinarySquareArray start(3);
-	start.at(1, 0) = 1;
-	start.at(2, 1) = 1;
-	start.at(0, 2) = 1;
-	start.at(1, 2) = 1;
-	start.at(2, 2) = 1;
-	lexLowest(start);
-	rules[start] = std::list<BinarySquareArray*>();
+	BinarySquareArray screen(5000);
+	BinarySquareArray screenCopy(screen.size());
+	uint32_t screenSize = 3;
+
+	BSAView startView(&screen, 0, 0, screenSize);
+	startView.at(1, 0) = 1;
+	startView.at(2, 1) = 1;
+	startView.at(0, 2) = 1;
+	startView.at(1, 2) = 1;
+	startView.at(2, 2) = 1;
+	lexLowest(startView);
+	BinarySquareArray start = startView;
+	rules[start] = nullptr;
 
 	std::string line;
 	while (std::getline(*mIn, line))
@@ -229,30 +304,18 @@ void BugFix<21>::solve1st()
 		const std::string ruleLeft = line.substr(0, sepPos);
 		const std::string ruleRight = line.substr(sepPos + 4);
 
-		std::list<BinarySquareArray*> left = newListFromString(ruleLeft);
-		std::list<BinarySquareArray*> right = newListFromString(ruleRight);
-		allSquares.insert(allSquares.end(), left.begin(), left.end());
-		allSquares.insert(allSquares.end(), right.begin(), right.end());
+		BinarySquareArray* left = newFromString(ruleLeft);
+		BinarySquareArray* right = newFromString(ruleRight);
+		allSquares.push_back(left);
+		allSquares.push_back(right);
 
-		lexLowest(*left.front());
-		for (auto bs : right)
-			lexLowest(*bs);
-
-		assert(!right.empty() && "Empty rules?");
-		//assert(rules.find(*left.front()) == rules.end() && "Overriding rule?");
-		for (auto bs : right)
-		{
-			if (rules.find(*bs) == rules.end())
-				rules[*bs] = std::list<BinarySquareArray*>();
-		}
-		if (left.front()->size() == 3 && rules.find(*left.front()) == rules.end())
-			continue;
-		rules[*left.front()] = std::move(right);
+		lexLowest(*left);
+		rules[*left] = right;
 	}
 
-	for (auto const& rule : rules)
+	/*for (auto const& rule : rules)
 	{
-		for (uint8_t y = 0; y < 3; ++y)
+		for (uint8_t y = 0; y < 4; ++y)
 		{
 			for (uint8_t x = 0; x < 3; ++x)
 			{
@@ -261,190 +324,64 @@ void BugFix<21>::solve1st()
 				else
 					*mOut << " ";
 			}
-			*mOut << "   ";
-			for (auto rbs : rule.second)
+			*mOut << "    ";
+			for (uint8_t x = 0; x < 4; ++x)
 			{
-				for (uint8_t x = 0; x < 3; ++x)
-				{
-					if (x < rbs->size() && y < rbs->size())
-						*mOut << (rbs->at(x, y) ? 'o' : '.');
-					else
-						*mOut << " ";
-				}
-				*mOut << " ";
+				if (x < rule.second->size() && y < rule.second->size())
+					*mOut << (rule.second->at(x, y) ? 'o' : '.');
+				else
+					*mOut << " ";
 			}
+			*mOut << " ";
 			*mOut << std::endl;
 		}
 		*mOut << "--------------------" << std::endl;
-	}
+	}*/
 
-	std::list<BinarySquareArray*> queue;
-	queue.push_back(&start);
 	uint32_t step = 0;
 	uint32_t sizePopped = 3;
 	while (step < 5)
 	{
-		//*mOut << "Square:" << std::endl << queue.front()->toString() << std::endl;
-		if (queue.front()->size() != sizePopped)
+		//*mOut << BSAView(&screen, 0, 0, 24).toString() << std::endl;
+		screenCopy = screen;
+		if (screenSize % 2 == 0)
 		{
-			for (uint8_t y = 0; y < 3; ++y)
+			for (uint32_t j = 0; j < screenSize / 2; ++j)
 			{
-				for (auto rbs : queue)
+				for (uint32_t i = 0; i < screenSize / 2; ++i)
 				{
-					for (uint8_t x = 0; x < 3; ++x)
-					{
-						if (x < rbs->size() && y < rbs->size())
-							*mOut << (rbs->at(x, y) ? 'o' : '.');
-						else
-							*mOut << " ";
-					}
-					*mOut << " ";
+					BinarySquareArray bs = BSAView(&screen, i * 2, j * 2, 2);
+					lexLowest(bs);
+					auto const& substitute = *rules[bs];
+					BSAView(&screenCopy, i * 3, j * 3, 3) = substitute;
 				}
-				*mOut << std::endl;
 			}
-			*mOut << "=====================" << std::endl;
-			++step;
-			/*if (step == 5)
-				break;*/
-			sizePopped = queue.front()->size();
+			screenSize = screenSize / 2 * 3;
 		}
-		auto it = rules.find(*queue.front());
-		assert(it != rules.end() && "Can't find a rule");
-		assert(it->first.size() == queue.front()->size() && "Sizes don't match?");
-		auto const& rightSide = rules[*queue.front()];
-		for (auto bs : rightSide)
+		else
 		{
-			//*mOut << bs->toString();
-			queue.push_back(bs);
+			for (uint32_t j = 0; j < screenSize / 3; ++j)
+			{
+				for (uint32_t i = 0; i < screenSize / 3; ++i)
+				{
+					BinarySquareArray bs = BSAView(&screen, i * 3, j * 3, 3);
+					lexLowest(bs);
+					auto const& substitute = *rules[bs];
+					BSAView(&screenCopy, i * 4, j * 4, 4) = substitute;
+				}
+			}
+			screenSize = screenSize / 3 * 4;
 		}
-		//*mOut << std::endl;
-		queue.erase(queue.begin());
+		screen = screenCopy;
+		++step;
 	}
+	//*mOut << BSAView(&screen, 0, 0, 24).toString() << std::endl;
 
-	uint32_t numPixelsOn = 0;
-	while (!queue.empty())
-	{
-		numPixelsOn += queue.front()->countTrue();
-		queue.erase(queue.begin());
-	}
+	uint32_t const numPixelsOn = screen.countTrue();
 	*mOut << numPixelsOn << std::endl;
 }
 
 void BugFix<21>::solve2nd()
 {
-	std::list<BinarySquareArray*> allSquares;
-	std::unordered_map<BinarySquareArray, std::list<BinarySquareArray*>> rules;
-
-	std::string line;
-	while (std::getline(*mIn, line))
-	{
-		auto sepPos = line.find(" => ");
-		const std::string ruleLeft = line.substr(0, sepPos);
-		const std::string ruleRight = line.substr(sepPos + 4);
-
-		std::list<BinarySquareArray*> left = newListFromString(ruleLeft);
-		//std::list<BinarySquareArray*> leftc = newListFromString(ruleLeft);
-		std::list<BinarySquareArray*> right = newListFromString(ruleRight);
-		allSquares.insert(allSquares.end(), left.begin(), left.end());
-		allSquares.insert(allSquares.end(), right.begin(), right.end());
-
-		for (uint8_t y = 0; y < 3; ++y)
-		{
-			for (uint8_t x = 0; x < 3; ++x)
-			{
-				if (x < left.front()->size() && y < left.front()->size())
-					*mOut << (left.front()->at(x, y) ? 'o' : '.');
-				else
-					*mOut << " ";
-			}
-			*mOut << "   ";
-			for (auto rbs : right)
-			{
-				for (uint8_t x = 0; x < 3; ++x)
-				{
-					if (x < rbs->size() && y < rbs->size())
-						*mOut << (rbs->at(x, y) ? 'o' : '.');
-					else
-						*mOut << " ";
-				}
-				*mOut << " ";
-			}
-			*mOut << std::endl;
-		}
-		*mOut << std::endl;
-
-		lexLowest(*left.front());
-		for (auto bs : right)
-			lexLowest(*bs);
-
-		for (uint8_t y = 0; y < 3; ++y)
-		{
-			for (uint8_t x = 0; x < 3; ++x)
-			{
-				if (x < left.front()->size() && y < left.front()->size())
-					*mOut << (left.front()->at(x, y) ? 'o' : '.');
-				else
-					*mOut << " ";
-			}
-			*mOut << "   ";
-			for (auto rbs : right)
-			{
-				for (uint8_t x = 0; x < 3; ++x)
-				{
-					if (x < rbs->size() && y < rbs->size())
-						*mOut << (rbs->at(x, y) ? 'o' : '.');
-					else
-						*mOut << " ";
-				}
-				*mOut << " ";
-			}
-			*mOut << std::endl;
-		}
-		*mOut << "--------------------" << std::endl;
-
-		assert(!right.empty() && "Empty rules?");
-		assert(rules.find(*left.front()) == rules.end() && "Overriding rule?");
-		rules[*left.front()] = std::move(right);
-		//*mOut << left.front()->toString() << std::endl;
-	}
-
-	BinarySquareArray start(3);
-	start.at(1, 0) = 1;
-	start.at(2, 1) = 1;
-	start.at(0, 2) = 1;
-	start.at(1, 2) = 1;
-	start.at(2, 2) = 1;
-	lexLowest(start);
-
-	std::queue<BinarySquareArray*> queue;
-	queue.push(&start);
-	uint32_t step = 0;
-	uint32_t sizePopped = 3;
-	while (step < 18)
-	{
-		if (queue.front()->size() != sizePopped)
-		{
-			++step;
-			if (step == 18)
-				break;
-			sizePopped = queue.front()->size();
-		}
-		auto it = rules.find(*queue.front());
-		assert(it != rules.end() && "Can't find a rule");
-		assert(it->first.size() == queue.front()->size() && "Sizes don't match?");
-		auto const& rightSide = rules[*queue.front()];
-		for (auto bs : rightSide)
-		{
-			queue.push(bs);
-		}
-		queue.pop();
-	}
-
-	uint32_t numPixelsOn = 0;
-	while (!queue.empty())
-	{
-		numPixelsOn += queue.front()->countTrue();
-		queue.pop();
-	}
-	*mOut << numPixelsOn << std::endl;
+	// same but 18 steps
 }

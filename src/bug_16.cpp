@@ -62,7 +62,6 @@ private:
 	std::array<int, mSize> mPositions;
 };
 
-std::set<std::string> strings;
 
 void BugFix<16>::solve1st()
 {
@@ -70,6 +69,7 @@ void BugFix<16>::solve1st()
 	int from{ 0 }, to{ 0 };
 	char left{ 0 }, right{ 0 };
 	ProgramDance dance;
+	//*mOut << dance.getLetters() << std::endl;
 
 	while (*mIn >> command)
 	{
@@ -92,60 +92,60 @@ void BugFix<16>::solve1st()
 		*mIn >> garbage;
 	}
 	*mOut << dance.getLetters() << std::endl;
+	*mOut << std::endl;
 }
 
 void BugFix<16>::solve2nd()
 {
+	std::set<std::string> strings;
+
 	char command{ 0 }, garbage{ 0 };
 	int from{ 0 }, to{ 0 };
 	char left{ 0 }, right{ 0 };
 	ProgramDance dance;
+	strings.insert(dance.getLetters());
+	*mOut << dance.getLetters() << std::endl;
 
-	while (*mIn >> command)
+	std::string input;
+	*mIn >> input;
+	std::istringstream inputOS(input);
+	uint32_t cycleSize = 0;
+	// cycle repeats every 60 dances, 1000000000 % 60 == 40
+	for (uint32_t i = 0; i < 40; ++i)
 	{
-		if (command == 's')
+		inputOS = std::istringstream(input);
+		while (inputOS >> command)
 		{
-			*mIn >> from;
-			dance.spin(from);
+			if (command == 's')
+			{
+				inputOS >> from;
+				dance.spin(from);
+			}
+			else if (command == 'x')
+			{
+				inputOS >> from >> garbage >> to;
+				dance.exchange(from, to);
+			}
+			else if (command == 'p')
+			{
+				inputOS >> left >> garbage >> right;
+				dance.partner(left, right);
+			}
+			//*mOut << dance.getLetters() << std::endl;
+			inputOS >> garbage;
 		}
-		else if (command == 'x')
-		{
-			*mIn >> from >> garbage >> to;
-			dance.exchange(from, to);
-		}
-		else if (command == 'p')
-		{
-			*mIn >> left >> garbage >> right;
-			dance.partner(left, right);
-		}
-		//*mOut << dance.getLetters() << std::endl;
-		*mIn >> garbage;
-	}
-	auto positions = dance.getPositions();
-	std::string firstDance = dance.getLetters();
-	std::string letters = ProgramDance().getLetters();
-	std::string letters2 = letters;
 
-	strings.insert(letters);
+		//std::string const letters = dance.getLetters();
+		//*mOut << letters << std::endl;
+		//if (strings.find(letters) != strings.end())
+		//{
+		//	*mOut << "At " << i << " repeating: " << letters << std::endl;
+		//	cycleSize = i;
+		//	break;
+		//}
+		//strings.insert(dance.getLetters());
+	}
+
+	std::string const letters = dance.getLetters();
 	*mOut << letters << std::endl;
-
-	for (size_t i = 0; i < 30; ++i)
-	{
-		letters2 = letters;
-		for (int k = 0; k < dance.getSize(); ++k)
-		{
-			letters2[positions[k]] = letters[k];
-		}
-		letters = letters2;
-		*mOut << letters << std::endl;
-
-		if (strings.find(letters) != strings.end())
-		{
-			*mOut << i << " " << letters << std::endl;
-			break;
-		}
-		strings.insert(letters);
-	}
-
-	*mOut << letters2 << std::endl; // gboiefnjpmkchald
 }

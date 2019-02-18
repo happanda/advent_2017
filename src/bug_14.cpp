@@ -1,3 +1,4 @@
+#include <iomanip>
 #include "advent.h"
 
 
@@ -70,63 +71,6 @@ void BugFix<14>::solve1st()
 	std::string line;
 	*mIn >> line;
 
-	int numWritten = 0;
-	for (int i = 0; i < length; ++i)
-	{
-		std::string const str = line + "-" + std::to_string(i);
-		std::string const hash = knotHash(str);
-
-		//*mOut << str << '\t' << hash << std::endl;		
-
-		for (char ch : hash)
-		{
-			char binary = 0;
-			if (ch >= '0' && ch <= '9')
-				binary = ch - '0';
-			else
-				binary = ch - 'a' + 10;
-
-			int bit = 1;
-			while (bit < (1 << 4))
-			{
-				if (bit & binary)
-					++numWritten;
-				bit = bit << 1;
-			}
-		}
-	}
-
-	*mOut << numWritten << std::endl;
-}
-
-void traverseRegion(std::vector<std::vector<bool>>& blocks, int i, int j)
-{
-	if (!blocks[i][j])
-		return;
-
-	static std::pair<int, int> constexpr shift[] = { { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 0 } };
-	static int constexpr shiftLen = sizeof(shift) / sizeof(shift[0]);
-
-	blocks[i][j] = false;
-	for (int k = 0; k < shiftLen; ++k)
-	{
-		int const xs = i + shift[k].first;
-		int const ys = j + shift[k].second;
-		if (xs >= 0 && xs < blocks.size() && ys >= 0 && ys < blocks.size())
-		{
-			if (blocks[xs][ys])
-				traverseRegion(blocks, xs, ys);
-		}
-	}
-}
-
-void BugFix<14>::solve2nd()
-{
-	int const length = 128;
-
-	std::string line;
-	*mIn >> line;
-
 	std::vector<std::vector<bool>> blocks(length);
 
 	int numWritten = 0;
@@ -135,7 +79,7 @@ void BugFix<14>::solve2nd()
 		std::string const str = line + "-" + std::to_string(i);
 		std::string const hash = knotHash(str);
 
-		//*mOut << str << '\t' << hash << std::endl;
+		//*mOut << str << '\t' << hash << std::endl;		
 		blocks[i].resize(length);
 
 		int column = 0;
@@ -147,12 +91,14 @@ void BugFix<14>::solve2nd()
 			else
 				binary = ch - 'a' + 10;
 
-			int bit = 1;
-			while (bit < (1 << 4))
+			int bit = 8;
+			while (bit > 0)
 			{
 				if (bit & binary)
 					blocks[i][column] = true;
-				bit = bit << 1;
+				if (bit & binary)
+					++numWritten;
+				bit = bit >> 1;
 				++column;
 			}
 		}
@@ -170,18 +116,93 @@ void BugFix<14>::solve2nd()
 		*mOut << std::endl;
 	}
 
+	*mOut << numWritten << std::endl;
+}
+
+void traverseRegion(std::vector<std::vector<uint32_t>>& blocks, int i, int j, int id)
+{
+	if (blocks[i][j] == 0)
+		return;
+
+	static std::pair<int, int> constexpr shift[] = { { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 0 } };
+	static int constexpr shiftLen = sizeof(shift) / sizeof(shift[0]);
+
+	blocks[i][j] = id;
+	for (int k = 0; k < shiftLen; ++k)
+	{
+		int const xs = i + shift[k].first;
+		int const ys = j + shift[k].second;
+		if (xs >= 0 && xs < blocks.size() && ys >= 0 && ys < blocks.size())
+		{
+			if (blocks[xs][ys] == 1)
+				traverseRegion(blocks, xs, ys, id);
+		}
+	}
+}
+
+void BugFix<14>::solve2nd()
+{
+	int const length = 128;
+
+	std::string line;
+	*mIn >> line;
+
+	std::vector<std::vector<uint32_t>> blocks(length);
+
+	int numWritten = 0;
+	for (int i = 0; i < length; ++i)
+	{
+		std::string const str = line + "-" + std::to_string(i);
+		std::string const hash = knotHash(str);
+
+		//*mOut << str << '\t' << hash << std::endl;
+		blocks[i].resize(length);
+		std::fill(blocks[i].begin(), blocks[i].end(), 0);
+
+		int column = 0;
+		for (char ch : hash)
+		{
+			char binary = 0;
+			if (ch >= '0' && ch <= '9')
+				binary = ch - '0';
+			else
+				binary = ch - 'a' + 10;
+
+			int bit = 8;
+			while (bit > 0)
+			{
+				if (bit & binary)
+					blocks[i][column] = 1;
+				bit = bit >> 1;
+				++column;
+			}
+		}
+	}
+
 	int numRegions = 0;
 	for (int i = 0; i < length; ++i)
 	{
 		for (int j = 0; j < length; ++j)
 		{
-			if (blocks[i][j])
+			if (blocks[i][j] == 1)
 			{
 				++numRegions;
-				traverseRegion(blocks, i, j);
+				traverseRegion(blocks, i, j, numRegions + 1);
 			}
 		}
 	}
+
+	//for (int i = 0; i < length; ++i)
+	//{
+	//	for (int j = 0; j < length; ++j)
+	//	{
+	//		if (blocks[i][j] == 0)
+	//			*mOut << std::setw(3) << '.';
+	//		else
+	//			*mOut << std::setw(3) << blocks[i][j];
+	//	}
+	//	*mOut << std::endl;
+	//}
 
 	*mOut << numRegions << std::endl;
 }
